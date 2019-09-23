@@ -30,9 +30,9 @@ fm.register(board_info.SPK_LRCLK,fm.fpioa.I2S0_WS)
 wav_dev = I2S(I2S.DEVICE_0)
 
 
-def sound(path = "/flash/ding.wav"):
+def sound(audio_file_path = "/flash/ding.wav"):
     try:
-        player = audio.Audio(path)
+        player = audio.Audio(path = audio_file_path)
         player.volume(100)
         wav_info = player.play_process(wav_dev)
         wav_dev.channel_config(wav_dev.CHANNEL_1, I2S.TRANSMITTER,resolution = I2S.RESOLUTION_16_BIT, align_mode = I2S.STANDARD_MODE)
