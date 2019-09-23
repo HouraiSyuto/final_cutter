@@ -29,21 +29,26 @@ fm.register(board_info.SPK_LRCLK,fm.fpioa.I2S0_WS)
 
 wav_dev = I2S(I2S.DEVICE_0)
 
-try:
-    player = audio.Audio(path = "/sd/dog1.wav")
-    player.volume(100)
-    wav_info = player.play_process(wav_dev)
-    wav_dev.channel_config(wav_dev.CHANNEL_1, I2S.TRANSMITTER,resolution = I2S.RESOLUTION_16_BIT, align_mode = I2S.STANDARD_MODE)
-    wav_dev.set_sample_rate(wav_info[1])
-    while True:
-        ret = player.play()
-        if ret == None:
-            break
-        elif ret==0:
-            break
-    player.finish()
-except:
-    pass
+
+def sound(audio_file_path = "/flash/ding.wav"):
+    try:
+        player = audio.Audio(path = audio_file_path)
+        player.volume(100)
+        wav_info = player.play_process(wav_dev)
+        wav_dev.channel_config(wav_dev.CHANNEL_1, I2S.TRANSMITTER,resolution = I2S.RESOLUTION_16_BIT, align_mode = I2S.STANDARD_MODE)
+        wav_dev.set_sample_rate(wav_info[1])
+        while True:
+            ret = player.play()
+            if ret == None:
+                break
+            elif ret==0:
+                break
+        player.finish()
+    except:
+        pass
+
+
+sound()
 
 fm.register(board_info.BUTTON_A, fm.fpioa.GPIO1)
 but_a=GPIO(GPIO.GPIO1, GPIO.IN, GPIO.PULL_UP) #PULL_UP is required here!
@@ -107,18 +112,7 @@ try:
         if bbox:
             for i in bbox:
                 print(i)
-                player = audio.Audio(path = "/sd/dog1.wav")
-                player.volume(100)
-                wav_info = player.play_process(wav_dev)
-                wav_dev.channel_config(wav_dev.CHANNEL_1, I2S.TRANSMITTER,resolution = I2S.RESOLUTION_16_BIT, align_mode = I2S.STANDARD_MODE)
-                wav_dev.set_sample_rate(wav_info[1])
-                while True:
-                    ret = player.play()
-                    if ret == None:
-                        break
-                    elif ret==0:
-                        break
-                player.finish()
+                sound("/sd/dog1.wav")
 
                 img.draw_rectangle(i.rect())
         lcd.display(img)
