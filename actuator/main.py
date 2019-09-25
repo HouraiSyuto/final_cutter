@@ -9,8 +9,8 @@ lcd.setColor(lcd.WHITE)
 lcd.print("Hi!\n")
 
 # モーターをつなぐピン
-pin16 = Pin(16, Pin.OUT)
-pin17 = Pin(17, Pin.OUT)
+motor1 = Pin(1, Pin.OUT)
+motor2 = Pin(3, Pin.OUT)
 lcd.print("PINs initialized!\n")
 
 actuator_status = { 
@@ -42,20 +42,21 @@ def is_stopped():
     return not is_started() and not is_reversed()
 
 def start():
-    pin16.value(1)
-    pin17.value(0)
+    motor1.value(1)
+    motor2.value(0)
     set_started()
      
 def reverse():
-    pin16.value(0)
-    pin17.value(1)
+    motor1.value(0)
+    motor2.value(1)
     set_reversed()
 
 def stop():
     toggle()
     utime.sleep(0.5)
-    pin16.value(0)
-    pin17.value(0)
+
+    motor1.value(0)
+    motor2.value(0)
     set_stopped()
 
 def toggle():
