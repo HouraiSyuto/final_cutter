@@ -1,17 +1,22 @@
 from m5stack import *
-from machine import Pin
+from machine import Pin, RTC, UART
 import utime
 
 utime.sleep(2)
 lcd.clear()
 lcd.setCursor(0, 0)
 lcd.setColor(lcd.WHITE)
-lcd.print("Hi!\n")
+lcd.print("Hi!hayapi!!\n")
 
 # モーターをつなぐピン
 motor1 = Pin(1, Pin.OUT)
 motor2 = Pin(3, Pin.OUT)
 lcd.print("PINs initialized!\n")
+
+# Init GPS
+lcd.print('UART:Initializing\n', 0, 0)
+uart2 = UART(2, tx=17, rx=16, baudrate=9600, timeout=200, buffer_size=256, lineend='\r\n')
+lcd.print('UART:Initialized\n')
 
 actuator_status = { 
     'started': False, 'reversed': False, 'stopped': False 
@@ -67,6 +72,12 @@ def toggle():
             start()
 
 while True:
+    length = uart2.any()
+    if length > 0:
+        lcd.print('aaaaaaaa\n')
+
+        stop()
+
     if buttonA.wasPressed() and not is_started():
         lcd.clear()
         lcd.setCursor(0, 0)
