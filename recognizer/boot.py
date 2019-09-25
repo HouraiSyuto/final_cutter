@@ -117,7 +117,10 @@ while(True):
                     tasikarasisa = max(tasikarasisa, float(i.value()))
 
         if person == True and tasikarasisa > 0.90:
-            sound()
+            led = random.choice([led_r, led_g, led_b])
+            led_on(led)
+            alert()
+            led_off(led)
 
     else:
         a = lcd.display(img)
