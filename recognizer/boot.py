@@ -5,7 +5,7 @@ import sys
 import random
 
 lcd.init()
-lcd.rotation(2) #Rotate the lcd 180deg
+lcd.rotation(0) #Rotate the lcd 180deg
 
 try:
     img = image.Image("/flash/startup.jpg")
