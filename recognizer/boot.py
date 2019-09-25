@@ -1,9 +1,8 @@
-
-import lcd
-import image
-import time
+import sensor,image,lcd,time
+import KPU as kpu
 import uos
 import sys
+import random
 
 lcd.init()
 lcd.rotation(2) #Rotate the lcd 180deg
@@ -31,23 +30,34 @@ wav_dev = I2S(I2S.DEVICE_0)
 
 
 def sound(audio_file_path = "/flash/ding.wav"):
-    try:
-        player = audio.Audio(path = audio_file_path)
-        player.volume(100)
-        wav_info = player.play_process(wav_dev)
-        wav_dev.channel_config(wav_dev.CHANNEL_1, I2S.TRANSMITTER,resolution = I2S.RESOLUTION_16_BIT, align_mode = I2S.STANDARD_MODE)
-        wav_dev.set_sample_rate(wav_info[1])
-        while True:
-            ret = player.play()
-            if ret == None:
-                break
-            elif ret==0:
-                break
-        player.finish()
-    except:
-        pass
+    player = audio.Audio(path = audio_file_path)
+    player.volume(10)
+    wav_info = player.play_process(wav_dev)
+    wav_dev.channel_config(wav_dev.CHANNEL_1, I2S.TRANSMITTER,resolution = I2S.RESOLUTION_16_BIT, align_mode = I2S.STANDARD_MODE)
+    wav_dev.set_sample_rate(wav_info[1])
+    while True:
+        ret = player.play()
+        if ret == None:
+            break
+        elif ret==0:
+            break
+    player.finish()
 
 
+def alert():
+    # sound("/sd/alert400.wav")
+    sound()
+
+
+def led_on(led):
+    led.value(0)
+
+
+def led_off(led):
+    led.value(1)
+
+
+# 起動音を鳴らす
 sound()
 
 fm.register(board_info.BUTTON_A, fm.fpioa.GPIO1)
@@ -78,55 +88,37 @@ led_b.value(1) #RGBW LEDs are Active Low
 
 time.sleep(0.5) # Delay for few seconds to see the start-up screen :p
 
-import sensor
-import KPU as kpu
-
-err_counter = 0
-
-while 1:
-    try:
-        sensor.reset() #Reset sensor may failed, let's try some times
-        break
-    except:
-        err_counter = err_counter + 1
-        if err_counter == 20:
-            lcd.draw_string(lcd.width()//2-100,lcd.height()//2-4, "Error: Sensor Init Failed", lcd.WHITE, lcd.RED)
-        time.sleep(0.1)
-        continue
-
+lcd.init(freq=15000000)
+sensor.reset()
 sensor.set_pixformat(sensor.RGB565)
-sensor.set_framesize(sensor.QVGA) #QVGA=320x240
+sensor.set_framesize(sensor.QVGA)
+sensor.set_vflip(1)
 sensor.run(1)
+clock = time.clock()
+classes = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
+task = kpu.load(0x300000)
+anchor = (1.08, 1.19, 3.42, 4.41, 6.63, 11.38, 9.42, 5.11, 16.62, 10.52)
+a = kpu.init_yolo2(task, 0.5, 0.3, 5, anchor)
+while(True):
+    clock.tick()
+    img = sensor.snapshot()
+    code = kpu.run_yolo2(task, img)
+    if code:
+        for i in code:
+            person = False
+            tasikarasisa = float(0)
+            a=img.draw_rectangle(i.rect())
+            a = lcd.display(img)
+            for i in code:
+                lcd.draw_string(i.x(), i.y(), classes[i.classid()], lcd.RED, lcd.WHITE)
+                lcd.draw_string(i.x(), i.y()+12, '%f1.3'%i.value(), lcd.RED, lcd.WHITE)
+                if classes[i.classid()] == 'person':
+                    person = True
+                    tasikarasisa = max(tasikarasisa, float(i.value()))
 
-task = kpu.load(0x300000) # Load Model File from Flash
-anchor = (1.889, 2.5245, 2.9465, 3.94056, 3.99987, 5.3658, 5.155437, 6.92275, 6.718375, 9.01025)
-# Anchor data is for bbox, extracted from the training sets.
-kpu.init_yolo2(task, 0.5, 0.3, 5, anchor)
+        if person == True and tasikarasisa > 0.90:
+            sound()
 
-but_stu = 1
-
-try:
-    while(True):
-        img = sensor.snapshot() # Take an image from sensor
-        bbox = kpu.run_yolo2(task, img) # Run the detection routine
-        if bbox:
-            for i in bbox:
-                print(i)
-                sound("/sd/dog1.wav")
-
-                img.draw_rectangle(i.rect())
-        lcd.display(img)
-
-        if but_a.value() == 0 and but_stu == 1:
-            if led_w.value() == 1:
-                led_w.value(0)
-            else:
-                led_w.value(1)
-            but_stu = 0
-        if but_a.value() == 1 and but_stu == 0:
-            but_stu = 1
-
-except KeyboardInterrupt:
-    a = kpu.deinit(task)
-    print(a)
-    sys.exit()
+    else:
+        a = lcd.display(img)
+a = kpu.deinit(task)
