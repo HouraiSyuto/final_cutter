@@ -4,8 +4,18 @@ import uos
 import sys
 import random
 
+from fpioa_manager import fm
+from machine import UART
+fm.register(35, fm.fpioa.UART2_TX, force=True)
+fm.register(34, fm.fpioa.UART2_RX, force=True)
+
+uart_Port = UART(UART.UART2, 115200,8,0,0, timeout=1000, read_buf_len= 4096)
+data_packet = bytearray([0x00,0x00,0x00,0x00,0x00])
+
+
+
 lcd.init()
-lcd.rotation(0) #Rotate the lcd 180deg
+lcd.rotation(2) #Rotate the lcd 180deg
 
 try:
     img = image.Image("/flash/startup.jpg")
@@ -46,7 +56,7 @@ def sound(audio_file_path = "/flash/ding.wav"):
 
 def alert():
     # sound("/sd/alert400.wav")
-    sound("/sd/alert400.wav")
+    sound()
 
 
 def led_on(led):
@@ -117,6 +127,9 @@ while(True):
                     tasikarasisa = max(tasikarasisa, float(i.value()))
 
         if person == True and tasikarasisa > 0.90:
+            # UART2でM5Stackに通知
+            uart_Port.write(data_packet)
+            
             led = random.choice([led_r, led_g, led_b])
             led_on(led)
             alert()
