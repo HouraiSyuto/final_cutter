@@ -46,7 +46,7 @@ def sound(audio_file_path = "/flash/ding.wav"):
 
 def alert():
     # sound("/sd/alert400.wav")
-    sound()
+    sound("/sd/alert400.wav")
 
 
 def led_on(led):
