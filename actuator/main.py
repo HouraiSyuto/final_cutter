@@ -72,11 +72,6 @@ def toggle():
             start()
 
 while True:
-    length = uart2.any()
-    if length > 0:
-        lcd.print('aaaaaaaa\n')
-
-        stop()
 
     if buttonA.wasPressed() and not is_started():
         lcd.clear()
