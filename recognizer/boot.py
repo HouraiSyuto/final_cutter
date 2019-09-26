@@ -41,7 +41,7 @@ wav_dev = I2S(I2S.DEVICE_0)
 
 def sound(audio_file_path = "/flash/ding.wav"):
     player = audio.Audio(path = audio_file_path)
-    player.volume(10)
+    player.volume(30)
     wav_info = player.play_process(wav_dev)
     wav_dev.channel_config(wav_dev.CHANNEL_1, I2S.TRANSMITTER,resolution = I2S.RESOLUTION_16_BIT, align_mode = I2S.STANDARD_MODE)
     wav_dev.set_sample_rate(wav_info[1])
@@ -55,8 +55,7 @@ def sound(audio_file_path = "/flash/ding.wav"):
 
 
 def alert():
-    # sound("/sd/alert400.wav")
-    sound()
+    sound("/sd/nyu.wav")
 
 
 def led_on(led):
