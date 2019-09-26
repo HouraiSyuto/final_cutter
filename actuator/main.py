@@ -71,14 +71,8 @@ def toggle():
             reverse()
         else:
             start()
-           
-from machine import Pin, I2C
-import time
-
-i2c = I2C(sda=21 ,scl=22)
 
 while True:
-
 
     if buttonA.wasPressed() and not is_started():
         lcd.clear()
@@ -99,11 +93,4 @@ while True:
         lcd.setCursor(0, 0)
         lcd.print("button C pressed.\n")
 
-        stop()
-        
-    buf = i2c.readfrom(0x52,64)
-
-    if len(buf) > 10: 
-        lcd.print(buf + "\n")
-        buf = ""
         stop()
